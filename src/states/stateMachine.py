@@ -2,7 +2,8 @@ from states.state import State
 
 
 class StateMachine:
-    def __init__(self, states):
+    def __init__(self, states, remoteVariableState):
+        self.remoteVariableState = remoteVariableState
         self.states = states
 
     def start(self):

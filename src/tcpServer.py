@@ -11,19 +11,19 @@ class TcpServer:
 
 
     def start(self):
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.bind((self.adress, self.port))
-        server_socket.listen(1)
+        serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        serverSocket.bind((self.adress, self.port))
+        serverSocket.listen(1)
 
         print(f"Serwer nasłuchuje na {self.adress}:{self.port}")
 
         while True:
             try:
-                client_socket, addr = server_socket.accept()
+                clientSocket, addr = serverSocket.accept()
                 print(f"Połączono z: {addr}")
 
                 while True:
-                    data = client_socket.recv(1024).decode()
+                    data = clientSocket.recv(1024).decode()
                     
                     if not data:
                         # Jeśli brak danych, kończymy połączenie
@@ -31,19 +31,19 @@ class TcpServer:
 
                     print(f"Otrzymano: {data}")
 
-                    response = self.handeMassage(data)
+                    response = self.handeMessage(data)
 
-                    client_socket.send(str(response).encode())
+                    clientSocket.send(str(response).encode())
 
                 # Po zakończeniu wymiany danych z klientem, zamykamy połączenie
-                client_socket.close()
+                clientSocket.close()
 
             except Exception as e:
                 print(f"Zdarzył się błąd: {e}")
 
             
 
-    def handeMassage(self, data):
+    def handeMessage(self, data):
         splitedData = data.split(";")
         remoteVariableType = int(splitedData[0])
         remoteVariableMode= int(splitedData[1])
