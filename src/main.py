@@ -1,6 +1,7 @@
 import atexit
 import threading
 import cv2
+import nanocamera as nano
 
 from models.remoteVariable import RemoteVariable
 from models.remoteVariableType import RemoteVariableType
@@ -10,16 +11,34 @@ from states.followState import FollowState
 from states.manualState import ManualState
 from states.stateMachine import StateMachine 
 
-streamPipeline = (
-    "appsrc ! videoconvert ! video/x-raw,format=I420 ! "
-    "nvvidconv ! nvv4l2h264enc insert-sps-pps=true bitrate=4000000 ! "
-    "h264parse ! rtph264pay pt=96 ! "
-    "udpsink host=192.168.1.27 port=9002 sync=false"
+host = "192.168.1.27"
+port = 9002
+width = 1280
+height = 720
+fps = 30
+
+# cos tam dziala
+pipeline = (
+    f'appsrc is-live=true !'
+    f'videoconvert ! nvvidconv !'
+    f'nvv4l2h264enc ! h264parse ! '
+    f'rtph264pay config-interval=1 pt=96 ! udpsink host={host} port={port} sync=false'
 )
 
+# pipeline = (
+#     f'appsrc ! videoconvert ! video/x-raw,format=BGR ! '
+#     f'videoconvert ! x264enc ! h264parse ! '
+#     f'rtph264pay config-interval=1 pt=96 ! udpsink host={host} port={port} sync=false'
+# )
+
+
+
+
+camera = nano.Camera(camera_type=0, device_id=0, debug=True, width=1280, height=720)
+
 serialClient = SerialClient("COM9", 9600, 1)
-videoIn = cv2.VideoCapture(0)
-videoOut = cv2.VideoWriter(streamPipeline, cv2.CAP_GSTREAMER, 0, 30, (1920, 1080), True)
+# videoIn = cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
+videoOut = cv2.VideoWriter(pipeline, cv2.CAP_GSTREAMER, 0, fps, (width, height))
 
 remoteVariablesLock = threading.Lock()
 remoteVariables = [
@@ -29,13 +48,12 @@ remoteVariables = [
 ]
 
 states = [
-    FollowState(),
-    ManualState(serialClient, remoteVariables, videoIn, videoOut)
+    ManualState(serialClient, remoteVariables, camera, videoOut),
+    FollowState()
 ]
 
 
 
-## zadbac o wielowatkowosc
 server = TcpServer(5001, remoteVariables, remoteVariablesLock)
 serverThread = threading.Thread(target=lambda: server.start())
 
@@ -50,7 +68,7 @@ stateMachineThread.start()
 print("Dziala")
 
 def onExit():
-    videoIn.release()
+    camera.release()
     videoOut.release()
     cv2.destroyAllWindows()
 
