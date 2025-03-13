@@ -11,15 +11,15 @@ class TcpServer:
 
 
     def start(self):
-        serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        serverSocket.bind((self.adress, self.port))
-        serverSocket.listen(1)
+        self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.serverSocket.bind((self.adress, self.port))
+        self.serverSocket.listen(1)
 
         print(f"Serwer nasłuchuje na {self.adress}:{self.port}")
 
         while True:
             try:
-                clientSocket, addr = serverSocket.accept()
+                clientSocket, addr = self.serverSocket.accept()
                 print(f"Połączono z: {addr}")
 
                 while True:
@@ -30,10 +30,10 @@ class TcpServer:
                         break
 
                     print(f"Otrzymano: {data}")
-
                     response = self.handeMessage(data)
-
                     clientSocket.send(str(response).encode())
+                    print(f"Zwrocono: {response}")
+
 
                 # Po zakończeniu wymiany danych z klientem, zamykamy połączenie
                 clientSocket.close()
@@ -41,7 +41,9 @@ class TcpServer:
             except Exception as e:
                 print(f"Zdarzył się błąd: {e}")
 
-            
+    def stop(self):
+        self.serverSocket.close()
+        print("Zamknieto socket")
 
     def handeMessage(self, data):
         splitedData = data.split(";")
@@ -51,8 +53,8 @@ class TcpServer:
 
         if remoteVariableType is None or remoteVariableMode is None or remoteVariableContent is None :
             raise NameError("Wrong data")
-
-        remoteVariable = next((x for x in self.remoteVariables if x.remoteVariableType == remoteVariableType),None)
+        
+        remoteVariable = next((x for x in self.remoteVariables if x.remoteVariableType.value[0] == remoteVariableType),None)
 
         if remoteVariable is None:
             raise NameError("This remote variable dont exist")
@@ -60,8 +62,9 @@ class TcpServer:
         if remoteVariableMode == 1:
             with self.remoteVariablesLock:
                 remoteVariable.set(remoteVariableContent)
+                print(f"Ustawiono {remoteVariableContent}")
 
-        return remoteVariableContent.get()
+        return remoteVariable.get()
 
 
 

@@ -1,6 +1,8 @@
 from enum import Enum
 
 class RemoteVariableType(Enum):
-    HorisonalAxis = 0
-    VerticalAxis = 1
-    WorkingMode = 2
+        WorkingMode = 0,
+        TargetHorizontalAngle = 1,
+        TargetVerticalAngle = 2,
+        ActualHorizontaAngle = 3,
+        ActualVerticalAngle = 4,

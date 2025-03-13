@@ -5,7 +5,10 @@ class StateMachine:
     def __init__(self, states, remoteVariableState):
         self.remoteVariableState = remoteVariableState
         self.states = states
+        print(remoteVariableState)
 
     def start(self):
         while True:
-            self.states[0].execute()
+            self.states[self.remoteVariableState.get()].execute()
+            pass
+

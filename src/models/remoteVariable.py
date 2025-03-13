@@ -6,7 +6,8 @@ class RemoteVariable():
         self.toRefresh = True
 
     def set(self, value):
-        value = value
+        self.value = value
+        print(f"Prawdziwa wartosc {self.value}")
         self.toRefresh = True
 
     def get(self):

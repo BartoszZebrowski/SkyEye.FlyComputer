@@ -7,11 +7,11 @@ import cv2
 
 class ManualState(State):
 
-    def __init__(self, serialClient, remoteVariables, camera, videoOut):
+    def __init__(self, serialClient, remoteVariables, camera, outputStream):
         self.serialClient = serialClient
         self.remoteVariables = remoteVariables
         self.camera = camera
-        self.videoOut = videoOut
+        self.outputStream = outputStream
 
         super().__init__()
 
@@ -24,8 +24,10 @@ class ManualState(State):
 
     def processImage(self):
         frame = self.camera.read()
-        # print(frame.shape)
-        self.videoOut.write(frame)        
+
+        frame[:,:,1] = 0
+        
+        self.outputStream.write(frame)        
 
 
 
