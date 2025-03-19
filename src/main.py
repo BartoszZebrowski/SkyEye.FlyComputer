@@ -10,6 +10,7 @@ from tcpServer import TcpServer
 from states.followState import FollowState
 from states.manualState import ManualState
 from states.stateMachine import StateMachine 
+from udpServer import UdpServer
 
 host = "192.168.1.27"
 port = 9002
@@ -50,8 +51,8 @@ states = [
     FollowState(serialClient, remoteVariables, camera, outputStream)
 ]
 
-tcpServer = TcpServer(tcpPort, remoteVariables, remoteVariablesLock)
-serverThread = threading.Thread(target=lambda: tcpServer.start())
+udpServer = UdpServer(tcpPort, remoteVariables, remoteVariablesLock)
+serverThread = threading.Thread(target=lambda: udpServer.start())
 
 statemachine = StateMachine(states, RemoteVariable.getRemoteVariable(RemoteVariableType.WorkingMode, remoteVariables))
 stateMachineThread = threading.Thread(target=lambda: statemachine.start())
@@ -64,6 +65,6 @@ print("Dziala")
 def onExit():
     camera.release()
     outputStream.release()
-    tcpServer.stop()
+    udpServer.stop()
 
 atexit.register(onExit)
