@@ -9,6 +9,6 @@ class StateMachine:
 
     def start(self):
         while True:
-            self.states[self.remoteVariableState.get()].execute()
+            self.states[int(self.remoteVariableState.get())].execute()
             pass
 

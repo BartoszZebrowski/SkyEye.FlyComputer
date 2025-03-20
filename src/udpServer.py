@@ -20,7 +20,7 @@ class UdpServer:
             try:
                 data, client_address = self.serverSocket.recvfrom(1024)
                 message = data.decode()
-                print(f"Otrzymano od {client_address}: {message}")
+                # print(f"Otrzymano od {client_address}: {message}")
                 
                 response = self.handeMessage(message)        
 
@@ -37,7 +37,7 @@ class UdpServer:
         splitedData = data.split(";")
         remoteVariableType = int(splitedData[0])
         remoteVariableMode= int(splitedData[1])
-        remoteVariableContent = int(splitedData[2])
+        remoteVariableContent = float(splitedData[2])
 
         if remoteVariableType is None or remoteVariableMode is None or remoteVariableContent is None :
             raise NameError("Wrong data")
@@ -52,7 +52,9 @@ class UdpServer:
                 remoteVariable.set(remoteVariableContent)
                 print(f"Zwrocono {remoteVariableContent}")
 
-        return f"{remoteVariableType};{remoteVariable.get()}"
+        value = str(remoteVariable.get())
+
+        return f"{remoteVariableType};{value}"
 
 
 

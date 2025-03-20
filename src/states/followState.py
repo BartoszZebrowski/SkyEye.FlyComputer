@@ -13,15 +13,13 @@ class FollowState(State):
         super().__init__()
 
     def execute(self):
-        # print("ManualSate")
         self.processImage()
-
-        # vericalAxis = RemoteVariable.getRemoteVariable(RemoteVariableType.VerticalAxis, self.remoteVariables)
-        # self.serialClient.setValue(RemoteVariableType.VerticalAxis, vericalAxis)
 
     def processImage(self):
         frame = self.camera.read()
 
         frame[:,:,2] = 0
+
+        scaled_image = cv2.resize(frame, (1280, 720), interpolation=cv2.INTER_CUBIC)
 
         self.outputStream.write(frame)        

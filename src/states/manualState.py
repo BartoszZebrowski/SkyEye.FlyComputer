@@ -3,6 +3,7 @@ from models.remoteVariable import RemoteVariable
 from models.remoteVariableType import RemoteVariableType
 from states.state import State
 import cv2
+import machineVisionTools as mv
 
 
 class ManualState(State):
@@ -12,22 +13,17 @@ class ManualState(State):
         self.remoteVariables = remoteVariables
         self.camera = camera
         self.outputStream = outputStream
+        self.zoomValue = RemoteVariable.getRemoteVariable(RemoteVariableType.ZoomValue, self.remoteVariables)
 
         super().__init__()
 
     def execute(self):
-        # print("ManualSate")
         self.processImage()
-
-        # vericalAxis = RemoteVariable.getRemoteVariable(RemoteVariableType.VerticalAxis, self.remoteVariables)
-        # self.serialClient.setValue(RemoteVariableType.VerticalAxis, vericalAxis)
 
     def processImage(self):
         frame = self.camera.read()
 
-        frame[:,:,1] = 0
-        
-        self.outputStream.write(frame)        
+        frame = mv.zoomToCenter(frame, self.zoomValue.get())
+        scaled_image = cv2.resize(frame, (1280, 720), interpolation=cv2.INTER_CUBIC)
 
-
-
+        self.outputStream.write(scaled_image)

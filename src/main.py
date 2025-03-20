@@ -16,7 +16,7 @@ host = "192.168.1.27"
 port = 9002
 width = 1280
 height = 720
-bitrate = 5_000_000
+bitrate = 10_000_000
 fps = 30
 
 com = "COM9"
@@ -34,8 +34,8 @@ pipeline = (
 
 serialClient = SerialClient("COM9", 9600, 1)
 
-camera = nano.Camera(camera_type=0, device_id=0, debug=True, width=width, height=height)
-outputStream = cv2.VideoWriter(pipeline, cv2.CAP_GSTREAMER, 0, fps, (width, height))
+camera = nano.Camera(camera_type=0, device_id=0, debug=True, width=1280, height=720)
+outputStream = cv2.VideoWriter(pipeline, cv2.CAP_GSTREAMER, 0, fps, (1280, 720))
 
 remoteVariablesLock = threading.Lock()
 remoteVariables = [
@@ -44,6 +44,7 @@ remoteVariables = [
     RemoteVariable(RemoteVariableType.TargetVerticalAngle, 0),
     RemoteVariable(RemoteVariableType.ActualHorizontaAngle, 0),
     RemoteVariable(RemoteVariableType.ActualVerticalAngle, 0),
+    RemoteVariable(RemoteVariableType.ZoomValue, 1),
 ]
 
 states = [
@@ -60,7 +61,7 @@ stateMachineThread = threading.Thread(target=lambda: statemachine.start())
 serverThread.start()
 stateMachineThread.start()
 
-print("Dziala")
+print("Program started")
 
 def onExit():
     camera.release()

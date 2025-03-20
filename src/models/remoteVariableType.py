@@ -6,3 +6,4 @@ class RemoteVariableType(Enum):
         TargetVerticalAngle = 2,
         ActualHorizontaAngle = 3,
         ActualVerticalAngle = 4,
+        ZoomValue = 5,
