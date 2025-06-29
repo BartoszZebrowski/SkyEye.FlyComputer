@@ -5,7 +5,7 @@ import nanocamera as nano
 
 from models.remoteVariable import RemoteVariable
 from models.remoteVariableType import RemoteVariableType
-from serialClient import SerialClient
+from serialServer import SerialServer
 from tcpServer import TcpServer
 from states.followState import FollowState
 from states.manualState import ManualState
@@ -19,8 +19,8 @@ height = 720
 bitrate = 10_000_000
 fps = 30
 
-com = "COM9"
-baudrate = 9600
+com = "/dev/ttyUSB1"
+baudrate = 115200
 timeout = 1
 
 tcpPort = 5001
@@ -32,13 +32,12 @@ pipeline = (
     f'rtph264pay config-interval=1 pt=96 ! udpsink host={host} port={port} sync=false'
 )
 
-serialClient = SerialClient("COM9", 9600, 1)
-
 camera = nano.Camera(camera_type=0, device_id=0, debug=True, width=1280, height=720)
 outputStream = cv2.VideoWriter(pipeline, cv2.CAP_GSTREAMER, 0, fps, (1280, 720))
 
 remoteVariablesLock = threading.Lock()
 remoteVariables = [
+    RemoteVariable(RemoteVariableType.Ping, 0),
     RemoteVariable(RemoteVariableType.WorkingMode, 0),
     RemoteVariable(RemoteVariableType.TargetHorizontalAngle, 0),
     RemoteVariable(RemoteVariableType.TargetVerticalAngle, 0),
@@ -48,17 +47,21 @@ remoteVariables = [
 ]
 
 states = [
-    ManualState(serialClient, remoteVariables, camera, outputStream),
-    FollowState(serialClient, remoteVariables, camera, outputStream)
+    ManualState(remoteVariables, camera, outputStream),
+    FollowState(remoteVariables, camera, outputStream)
 ]
 
 udpServer = UdpServer(tcpPort, remoteVariables, remoteVariablesLock)
-serverThread = threading.Thread(target=lambda: udpServer.start())
+udpServerThread = threading.Thread(target=lambda: udpServer.start())
+
+serialServer = SerialServer(com, baudrate, timeout, remoteVariables, remoteVariablesLock)
+serialServerThread = threading.Thread(target=lambda: serialServer.start())
 
 statemachine = StateMachine(states, RemoteVariable.getRemoteVariable(RemoteVariableType.WorkingMode, remoteVariables))
 stateMachineThread = threading.Thread(target=lambda: statemachine.start())
 
-serverThread.start()
+udpServerThread.start()
+serialServerThread.start()
 stateMachineThread.start()
 
 print("Program started")
@@ -67,5 +70,6 @@ def onExit():
     camera.release()
     outputStream.release()
     udpServer.stop()
+    serialServer.stop()
 
 atexit.register(onExit)

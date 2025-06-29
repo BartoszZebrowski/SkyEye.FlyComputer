@@ -4,8 +4,7 @@ import cv2
 
 class FollowState(State):
 
-    def __init__(self, serialClient, remoteVariables, camera, outputStream):
-        self.serialClient = serialClient
+    def __init__(self, remoteVariables, camera, outputStream):
         self.remoteVariables = remoteVariables
         self.camera = camera
         self.outputStream = outputStream

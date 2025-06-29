@@ -42,7 +42,7 @@ class UdpServer:
         if remoteVariableType is None or remoteVariableMode is None or remoteVariableContent is None :
             raise NameError("Wrong data")
         
-        remoteVariable = next((x for x in self.remoteVariables if x.remoteVariableType.value[0] == remoteVariableType),None)
+        remoteVariable = next((x for x in self.remoteVariables if x.remoteVariableType.value == remoteVariableType),None)
 
         if remoteVariable is None:
             raise NameError("This remote variable dont exist")

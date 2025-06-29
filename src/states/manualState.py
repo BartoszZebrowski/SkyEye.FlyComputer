@@ -8,8 +8,7 @@ import machineVisionTools as mv
 
 class ManualState(State):
 
-    def __init__(self, serialClient, remoteVariables, camera, outputStream):
-        self.serialClient = serialClient
+    def __init__(self, remoteVariables, camera, outputStream):
         self.remoteVariables = remoteVariables
         self.camera = camera
         self.outputStream = outputStream
@@ -25,5 +24,6 @@ class ManualState(State):
 
         frame = mv.zoomToCenter(frame, self.zoomValue.get())
         scaled_image = cv2.resize(frame, (1280, 720), interpolation=cv2.INTER_CUBIC)
+        rotated_image = cv2.flip(scaled_image, -1)
 
         self.outputStream.write(scaled_image)
