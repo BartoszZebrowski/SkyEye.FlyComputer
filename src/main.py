@@ -6,7 +6,6 @@ import nanocamera as nano
 from models.remoteValue import *
 from models.remoteValueType import *
 from serialServer import SerialServer
-from tcpServer import TcpServer
 from states.mainState import MainState
 from states.stateMachine import StateMachine 
 from udpServer import UdpServer

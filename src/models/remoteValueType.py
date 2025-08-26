@@ -1,6 +1,8 @@
 from enum import Enum
 
-class RemoteVariableType(Enum):
+## @enum RemoteValueType
+#  @brief Typy zdalnych wartości przesyłanych między urządzeniami.
+class RemoteValueType(Enum):
         Ping = 0
         WorkingMode = 1
         TargetHorizontalAngle = 2
@@ -9,6 +11,8 @@ class RemoteVariableType(Enum):
         ActualVerticalAngle = 5
         ZoomValue = 6
 
-class RemoteVariableDevice(Enum):
+## @enum RemoteValueDevice
+#  @brief Typy urządzeń wymieniających dane.
+class RemoteValueDevice(Enum):
         PC = 0,
         Arduino = 1,

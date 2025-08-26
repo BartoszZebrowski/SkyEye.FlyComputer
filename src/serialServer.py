@@ -1,11 +1,19 @@
 import serial
 
 
+## @class SerialServer
+#  @brief Serwer komunikacji szeregowej obsługujący wymianę danych z Arduino.
 class SerialServer:
 
-    def __init__(self, portCom, baudrate, timeout, remoteVariables, remoteVariablesLock):
-        self.remoteVariables = remoteVariables
-        self.remoteVariablesLock = remoteVariablesLock 
+    ## @brief Inicjalizuje serwer portu szeregowego i referencje do zdalnych wartości.
+    #  @param portCom Nazwa portu szeregowego (np. "COM3" lub "/dev/ttyUSB0").
+    #  @param baudrate Prędkość transmisji (baud).
+    #  @param timeout Timeout odczytu z portu (sekundy).
+    #  @param remoteValues Lista obiektów RemoteValue przechowujących wartości zdalne.
+    #  @param remoteValuesLock Blokada (mutex) do bezpiecznej współbieżnej modyfikacji remoteValues.
+    def __init__(self, portCom, baudrate, timeout, remoteValues, remoteValuesLock):
+        self.remoteValues = remoteValues
+        self.remoteValuesLock = remoteValuesLock 
         self.serial = []
 
         self.serial = serial.Serial(
@@ -14,6 +22,7 @@ class SerialServer:
             timeout=timeout
         )
 
+    ## @brief Uruchamia główną pętlę serwera: czyta linie z portu, przetwarza i odsyła odpowiedzi.
     def start(self):
         while True:
             if self.serial.in_waiting > 0:
@@ -25,10 +34,15 @@ class SerialServer:
                 self.serial.write(response.encode())
 
 
+    ## @brief Zamyka połączenie szeregowe.
     def stop(self):
         self.serial.close()
 
 
+    ## @brief Przetwarza pojedynczą wiadomość w formacie „typ;tryb;wartość”.
+    #  @param data Linia tekstu odebrana z portu szeregowego.
+    #  @return Odpowiedź w formacie „typ;wartość” (z przecinkiem jako separatorem dziesiętnym).
+    #  @exception NameError Gdy dane są niepoprawne lub wskazana zmienna zdalna nie istnieje.
     def handeMessage(self, data):
         if data.count(";") != 2:
             print(f"[ARDUINO]: {data}")
@@ -36,24 +50,24 @@ class SerialServer:
 
         splitedData = data.split(";")
 
-        remoteVariableType = int(splitedData[0])
-        remoteVariableMode= int(splitedData[1])
-        remoteVariableContent = float(splitedData[2])
+        remoteValueType = int(splitedData[0])
+        remoteValueMode= int(splitedData[1])
+        remoteValueContent = float(splitedData[2])
 
-        if remoteVariableType is None or remoteVariableMode is None or remoteVariableContent is None :
+        if remoteValueType is None or remoteValueMode is None or remoteValueContent is None :
             raise NameError("Wrong data")
 
-        remoteVariable = next((x for x in self.remoteVariables if x.remoteVariableType.value == remoteVariableType),None)
+        remoteValue = next((x for x in self.remoteValues if x.remoteValueType.value == remoteValueType),None)
 
-        if remoteVariable is None:
+        if remoteValue is None:
             raise NameError("This remote variable dont exist")
         
-        if remoteVariableMode == 1:
-            with self.remoteVariablesLock:
-                remoteVariable.set(remoteVariableContent)
-                print(f"Zwrocono {remoteVariableContent}")
+        if remoteValueMode == 1:
+            with self.remoteValuesLock:
+                remoteValue.set(remoteValueContent)
+                print(f"Zwrocono {remoteValueContent}")
 
-        value = str(remoteVariable.get())
+        value = str(remoteValue.get())
         
 
-        return f"{remoteVariableType};{value}".replace(".", ",")
+        return f"{remoteValueType};{value}".replace(".", ",")
