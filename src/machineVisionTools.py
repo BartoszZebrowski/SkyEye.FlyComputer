@@ -17,3 +17,14 @@ def zoomToCenter(image, zoom_factor):
     zoomed = cv2.resize(cropped, (width, height), interpolation=cv2.INTER_LINEAR)
     
     return zoomed
+
+
+def stabilizeImageRoll(rotatedImage, value_type):
+    angle_deg = self._get_remote_value_deg(value_type)
+    compensate_deg = -float(angle_deg)
+
+    h, w = rotatedImage.shape[:2]
+    center = (w / 2.0, h / 2.0)
+
+    M = cv2.getRotationMatrix2D(center, compensate_deg, 1.0)
+    return cv2.warpAffine(rotatedImage, M, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)

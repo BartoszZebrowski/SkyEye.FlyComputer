@@ -1,18 +1,17 @@
-
-from models.remoteVariable import RemoteVariable
-from models.remoteVariableType import RemoteVariableType
+from models.remoteValue import *
+from models.remoteValueType import *
 from states.state import State
 import cv2
 import machineVisionTools as mv
 
 
-class ManualState(State):
+class MainState(State):
 
-    def __init__(self, remoteVariables, camera, outputStream):
-        self.remoteVariables = remoteVariables
+    def __init__(self, remoteValues, camera, outputStream):
+        self.remoteValues = remoteValues
         self.camera = camera
         self.outputStream = outputStream
-        self.zoomValue = RemoteVariable.getRemoteVariable(RemoteVariableType.ZoomValue, self.remoteVariables)
+        self.zoomValue = remoteValue.getremoteValue(remoteValueType.ZoomValue, self.remoteValues)
 
         super().__init__()
 
@@ -26,4 +25,6 @@ class ManualState(State):
         scaled_image = cv2.resize(frame, (1280, 720), interpolation=cv2.INTER_CUBIC)
         rotated_image = cv2.flip(scaled_image, -1)
 
-        self.outputStream.write(scaled_image)
+        stabilizeImage = mv.stabilizeImageRoll(rotatedImage, RemoteValueType.ActualRollValue)
+
+        self.outputStream.write(stabilizeImage)
